@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import StatsHeader from '@/layout/StatsHeader.vue';
+import Panel from 'primevue/panel';
 import { v4 as uuidv4 } from 'uuid';
 import { onMounted, ref } from 'vue';
 
@@ -129,22 +130,26 @@ const showSchedule = ref<boolean>(true);
 
 <template>
     <StatsHeader style="position: relative"></StatsHeader>
-    <div class="card">
-        <Button text icon="pi pi-plus" label="Show Schedule" @click="showSchedule = true" v-if="!showSchedule" />
-        <Button text icon="pi pi-minus" label="Hide Schedule" @click="showSchedule = false" v-if="showSchedule" />
-        <DataTable :value="processedGameData" dataKey="id" showGridlines stripedRows paginator :rows="10" v-if="showSchedule">
+    <div>
+        <Panel>
             <template #header>
-                <span class="text-900 font-medium text-xl">2024 Schedule</span>
+                <div class="flex items-center gap-2">
+                    <span class="text-900 font-medium text-xl">2024 Schedule</span>
+                    <Button text icon="pi pi-plus" label="Show Schedule" @click="showSchedule = true" v-if="!showSchedule" />
+                    <Button text icon="pi pi-minus" label="Hide Schedule" @click="showSchedule = false" v-if="showSchedule" />
+                </div>
             </template>
-            <Column field="week" header="Week"></Column>
-            <Column field="winner" header="Winner"></Column>
-            <Column field="pointsWinner" header="Points"></Column>
-            <Column field="yardsWinner" header="Yards"></Column>
-            <Column field="turnoversWinner" header="Turnovers"></Column>
-            <Column field="loser" header="Loser"></Column>
-            <Column field="pointsLoser" header="Points"></Column>
-            <Column field="yardsLoser" header="Yards"></Column>
-            <Column field="turnoversLoser" header="Turnovers"></Column>
-        </DataTable>
+            <DataTable :value="processedGameData" dataKey="id" showGridlines stripedRows paginator :rows="10" v-if="showSchedule">
+                <Column field="week" header="Week"></Column>
+                <Column field="winner" header="Winner"></Column>
+                <Column field="pointsWinner" header="Points"></Column>
+                <Column field="yardsWinner" header="Yards"></Column>
+                <Column field="turnoversWinner" header="Turnovers"></Column>
+                <Column field="loser" header="Loser"></Column>
+                <Column field="pointsLoser" header="Points"></Column>
+                <Column field="yardsLoser" header="Yards"></Column>
+                <Column field="turnoversLoser" header="Turnovers"></Column>
+            </DataTable>
+        </Panel>
     </div>
 </template>
