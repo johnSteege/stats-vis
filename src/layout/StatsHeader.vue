@@ -8,7 +8,7 @@ const { toggleDarkMode, isDarkTheme } = useLayout();
     <div class="layout-topbar">
         <div class="layout-topbar-logo-container">
             <router-link to="/" class="layout-topbar-logo">
-                <span>Stats</span>
+                <span>Stats Vis</span>
             </router-link>
         </div>
         <div class="layout-topbar-actions">
@@ -16,7 +16,7 @@ const { toggleDarkMode, isDarkTheme } = useLayout();
                 <button type="button" class="layout-topbar-action" @click="toggleDarkMode">
                     <i :class="['pi', { 'pi-moon': isDarkTheme, 'pi-sun': !isDarkTheme }]"></i>
                 </button>
-                <div class="relative">
+                <!-- <div class="relative">
                     <button
                         v-styleclass="{ selector: '@next', enterFromClass: 'hidden', enterActiveClass: 'animate-scalein', leaveToClass: 'hidden', leaveActiveClass: 'animate-fadeout', hideOnOutsideClick: true }"
                         type="button"
@@ -25,7 +25,7 @@ const { toggleDarkMode, isDarkTheme } = useLayout();
                         <i class="pi pi-palette"></i>
                     </button>
                     <AppConfigurator />
-                </div>
+                </div> -->
             </div>
         </div>
     </div>
