@@ -144,24 +144,40 @@ type ProcessedGameResult = {
 };
 const processedGameData = ref<ProcessedGameResult[]>([]);
 
-type TeamDiff = {
+type TeamTotals = {
     name: TeamName;
     gameCount: number;
-    points: number;
-    yards: number;
-    turnovers: number;
+    wins: number;
+    losses: number;
+    pointsFor: number;
+    pointsAgainst: number;
+    pointsDiff: number;
+    yardsFor: number;
+    yardsAgainst: number;
+    yardsDiff: number;
+    turnoversFor: number;
+    turnoversAgainst: number;
+    turnoversDiff: number;
 };
-const teamDiffData = ref<TeamDiff[]>([]);
-const teamDiffPerGame = ref<TeamDiff[]>([]);
+const teamTotalsData = ref<TeamTotals[]>([]);
+const totalsPerGame = ref<TeamTotals[]>([]);
 
 function processData() {
     TEAM_NAME_VALUES.forEach((name) => {
-        teamDiffData.value.push({
+        teamTotalsData.value.push({
             name: name,
             gameCount: 0,
-            points: 0,
-            yards: 0,
-            turnovers: 0
+            wins: 0,
+            losses: 0,
+            pointsFor: 0,
+            pointsAgainst: 0,
+            pointsDiff: 0,
+            yardsFor: 0,
+            yardsAgainst: 0,
+            yardsDiff: 0,
+            turnoversFor: 0,
+            turnoversAgainst: 0,
+            turnoversDiff: 0
         });
     });
 
@@ -180,34 +196,56 @@ function processData() {
             turnoversLoser: game.turnoversLoser
         });
 
-        const winnerDiff = teamDiffData.value.find((team) => team.name === game.winner);
-        winnerDiff.gameCount++;
-        winnerDiff.points += game.pointsWinner - game.pointsLoser;
-        winnerDiff.yards += game.yardsWinner - game.yardsLoser;
-        winnerDiff.turnovers += game.turnoversWinner - game.turnoversLoser;
+        const winnerTotals: TeamTotals = teamTotalsData.value.find((team) => team.name === game.winner);
+        winnerTotals.gameCount++;
+        winnerTotals.wins++;
+        winnerTotals.pointsFor += Number(game.pointsWinner);
+        winnerTotals.pointsAgainst += Number(game.pointsLoser);
+        winnerTotals.pointsDiff += Number(game.pointsWinner - game.pointsLoser);
+        winnerTotals.yardsFor += Number(game.yardsWinner);
+        winnerTotals.yardsAgainst += Number(game.yardsLoser);
+        winnerTotals.yardsDiff += Number(game.yardsWinner - game.yardsLoser);
+        winnerTotals.turnoversFor += Number(game.turnoversWinner);
+        winnerTotals.turnoversAgainst += Number(game.turnoversLoser);
+        winnerTotals.turnoversDiff += Number(game.turnoversWinner - game.turnoversLoser);
 
-        const loserDiff = teamDiffData.value.find((team) => team.name === game.loser);
-        loserDiff.gameCount++;
-        loserDiff.points += game.pointsLoser - game.pointsWinner;
-        loserDiff.yards += game.yardsLoser - game.yardsWinner;
-        loserDiff.turnovers += game.turnoversLoser - game.turnoversWinner;
+        const loserTotals: TeamTotals = teamTotalsData.value.find((team) => team.name === game.loser);
+        loserTotals.gameCount++;
+        loserTotals.losses++;
+        loserTotals.pointsFor += Number(game.pointsLoser);
+        loserTotals.pointsAgainst += Number(game.pointsWinner);
+        loserTotals.pointsDiff += Number(game.pointsLoser - game.pointsWinner);
+        loserTotals.yardsFor += Number(game.yardsLoser);
+        loserTotals.yardsAgainst += Number(game.yardsWinner);
+        loserTotals.yardsDiff += Number(game.yardsLoser - game.yardsWinner);
+        loserTotals.turnoversFor += Number(game.turnoversLoser);
+        loserTotals.turnoversAgainst += Number(game.turnoversWinner);
+        loserTotals.turnoversDiff += Number(game.turnoversLoser - game.turnoversWinner);
     });
 
     TEAM_NAME_VALUES.forEach((name) => {
-        const teamDiff: TeamDiff = teamDiffData.value.find((team) => team.name === name);
-        teamDiffPerGame.value.push({
+        const curTotals: TeamTotals = teamTotalsData.value.find((team) => team.name === name);
+        totalsPerGame.value.push({
             name: name,
-            gameCount: 1,
-            points: teamDiff.points / teamDiff.gameCount,
-            yards: teamDiff.yards / teamDiff.gameCount,
-            turnovers: teamDiff.turnovers / teamDiff.gameCount
+            gameCount: curTotals.gameCount,
+            wins: curTotals.wins,
+            losses: curTotals.losses,
+            pointsFor: curTotals.pointsFor / curTotals.gameCount,
+            pointsAgainst: curTotals.pointsAgainst / curTotals.gameCount,
+            pointsDiff: curTotals.pointsDiff / curTotals.gameCount,
+            yardsFor: curTotals.yardsFor / curTotals.gameCount,
+            yardsAgainst: curTotals.yardsAgainst / curTotals.gameCount,
+            yardsDiff: curTotals.yardsDiff / curTotals.gameCount,
+            turnoversFor: curTotals.turnoversFor / curTotals.gameCount,
+            turnoversAgainst: curTotals.turnoversAgainst / curTotals.gameCount,
+            turnoversDiff: curTotals.turnoversDiff / curTotals.gameCount
         });
     });
 }
 
 const showSchedule = ref<boolean>(true);
-const showDiffs = ref<boolean>(true);
-const diffsPerGame = ref<boolean>(false);
+const showTotals = ref<boolean>(true);
+const showTotalsPerGame = ref<boolean>(false);
 </script>
 
 <template>
@@ -216,21 +254,23 @@ const diffsPerGame = ref<boolean>(false);
         <Panel>
             <template #header>
                 <div class="flex items-center gap-2">
-                    <span class="text-900 font-medium text-xl">2024 Diffs</span>
-                    <Button text icon="pi pi-plus" label="Show Diffs" @click="showDiffs = true" v-if="!showDiffs" />
-                    <Button text icon="pi pi-minus" label="Hide Diffs" @click="showDiffs = false" v-if="showDiffs" />
-                    <Checkbox label="Per Game" inputId="diffsPerGame" v-model="diffsPerGame" binary /><label for="diffsPerGame">Per Game</label>
+                    <span class="text-900 font-medium text-xl">2024 Totals</span>
+                    <Button text icon="pi pi-plus" label="Show Totals" @click="showTotals = true" v-if="!showTotals" />
+                    <Button text icon="pi pi-minus" label="Hide Totals" @click="showTotals = false" v-if="showTotals" />
+                    <Checkbox label="Per Game" inputId="showTotalsPerGame" v-model="showTotalsPerGame" binary /><label for="showTotalsPerGame">Per Game</label>
                 </div>
             </template>
-            <DataTable :value="diffsPerGame ? teamDiffPerGame : teamDiffData" dataKey="name" showGridlines stripedRows v-if="showDiffs" removableSort>
+            <DataTable :value="showTotalsPerGame ? totalsPerGame : teamTotalsData" dataKey="name" showGridlines stripedRows v-if="showTotals" removableSort>
                 <Column field="name" header="Team"></Column>
-                <Column v-if="!diffsPerGame" field="gameCount" header="Games"></Column>
-                <Column field="points" header="Points" style="width: 10%" sortable
-                    ><template #body="{ data }"> {{ data.points.toFixed(diffsPerGame ? 1 : 0) }} </template></Column
-                ><Column field="yards" header="Yards" style="width: 10%" sortable
-                    ><template #body="{ data }"> {{ data.yards.toFixed(diffsPerGame ? 1 : 0) }} </template></Column
-                ><Column field="turnovers" header="Turnovers" style="width: 10%" sortable
-                    ><template #body="{ data }"> {{ data.turnovers.toFixed(diffsPerGame ? 2 : 0) }} </template></Column
+                <Column v-if="!showTotalsPerGame" field="gameCount" header="Games"></Column>
+                <Column v-if="!showTotalsPerGame" field="wins" header="Wins" sortable></Column>
+                <Column v-if="!showTotalsPerGame" field="losses" header="Losses" sortable></Column>
+                <Column field="pointsFor" header="Points For" sortable
+                    ><template #body="{ data }"> {{ data.pointsFor.toFixed(showTotalsPerGame ? 1 : 0) }} </template></Column
+                ><Column field="pointsAgainst" header="Points Against" sortable
+                    ><template #body="{ data }"> {{ data.pointsAgainst.toFixed(showTotalsPerGame ? 1 : 0) }} </template></Column
+                ><Column field="pointsDiff" header="Points Diff" sortable
+                    ><template #body="{ data }"> {{ data.pointsDiff.toFixed(showTotalsPerGame ? 1 : 0) }} </template></Column
                 >
             </DataTable>
         </Panel>
