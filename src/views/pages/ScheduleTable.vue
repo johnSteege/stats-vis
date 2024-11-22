@@ -310,21 +310,41 @@ const showTotalTurnovers = computed(() => {
                         <Checkbox label="Per Game" inputId="showTotalsPerGame" v-model="showTotalsPerGame" binary /><label for="showTotalsPerGame">Per Game</label>
                     </div>
                 </template>
+
                 <Column field="name" header="Team"></Column>
+
                 <Column v-if="!showTotalsPerGame" field="gameCount" header="Games"></Column>
+                <TotalsColumn v-if="!showTotalsPerGame && showTotalRecord" fieldName="wins" headerAbbv="W" headerTooltip="Wins" :perGame="showTotalsPerGame"></TotalsColumn>
+                <TotalsColumn v-if="!showTotalsPerGame && showTotalRecord" fieldName="losses" headerAbbv="L" headerTooltip="Losses" :perGame="showTotalsPerGame"></TotalsColumn>
+
+                <TotalsColumn v-if="showTotalPoints" fieldName="pointsFor" headerAbbv="PF" headerTooltip="Points For" :perGame="showTotalsPerGame"></TotalsColumn>
+                <TotalsColumn v-if="showTotalPoints" fieldName="pointsAgainst" headerAbbv="PA" headerTooltip="Points Against" :perGame="showTotalsPerGame"></TotalsColumn>
+                <TotalsColumn v-if="showTotalPoints" fieldName="pointsDiff" headerAbbv="PDif" headerTooltip="Point Differential" :perGame="showTotalsPerGame"></TotalsColumn>
+
+                <TotalsColumn v-if="showTotalYards" fieldName="yardsFor" headerAbbv="YF" headerTooltip="Yards For" :perGame="showTotalsPerGame"></TotalsColumn>
+                <TotalsColumn v-if="showTotalYards" fieldName="yardsAgainst" headerAbbv="YA" headerTooltip="Yards Against" :perGame="showTotalsPerGame"></TotalsColumn>
+                <TotalsColumn v-if="showTotalYards" fieldName="yardsDiff" headerAbbv="YDif" headerTooltip="Yard Differential" :perGame="showTotalsPerGame"></TotalsColumn>
+
+                <TotalsColumn v-if="showTotalTurnovers" fieldName="turnoversFor" headerAbbv="TF" headerTooltip="Turnovers For" :perGame="showTotalsPerGame"></TotalsColumn>
+                <TotalsColumn v-if="showTotalTurnovers" fieldName="turnoversAgainst" headerAbbv="TA" headerTooltip="Turnovers Against" :perGame="showTotalsPerGame"></TotalsColumn>
+                <TotalsColumn v-if="showTotalTurnovers" fieldName="turnoversDiff" headerAbbv="TDif" headerTooltip="Turnover Differential" :perGame="showTotalsPerGame"></TotalsColumn>
+
+                <!--
                 <Column v-if="!showTotalsPerGame && showTotalRecord" field="wins" sortable
                     ><template #header> <div v-tooltip.top="'Wins'">W</div></template>
                 </Column>
                 <Column v-if="!showTotalsPerGame && showTotalRecord" field="losses" sortable
                     ><template #header> <div v-tooltip.top="'Losses'">L</div></template>
-                </Column>
-                <Column v-if="showTotalPoints" field="pointsFor" sortable>
+                </Column> 
+
+                 <Column v-if="showTotalPoints" field="pointsFor" sortable>
                     <template #header> <div v-tooltip.top="'Points For'">PF</div></template> <template #body="{ data }"> {{ data.pointsFor.toFixed(showTotalsPerGame ? 1 : 0) }} </template></Column
                 ><Column v-if="showTotalPoints" field="pointsAgainst" sortable>
                     <template #header> <div v-tooltip.top="'Points Against'">PA</div></template><template #body="{ data }"> {{ data.pointsAgainst.toFixed(showTotalsPerGame ? 1 : 0) }} </template></Column
                 ><Column v-if="showTotalPoints" field="pointsDiff" sortable>
                     <template #header> <div v-tooltip.top="'Point Differential'">PDif</div></template><template #body="{ data }"> {{ data.pointsDiff.toFixed(showTotalsPerGame ? 1 : 0) }} </template></Column
                 >
+
                 <Column v-if="showTotalYards" field="yardsFor" sortable>
                     <template #header> <div v-tooltip.top="'Yards For'">YF</div></template><template #body="{ data }"> {{ data.yardsFor.toFixed(showTotalsPerGame ? 1 : 0) }} </template></Column
                 ><Column v-if="showTotalYards" field="yardsAgainst" sortable>
@@ -332,13 +352,14 @@ const showTotalTurnovers = computed(() => {
                 ><Column v-if="showTotalYards" field="yardsDiff" sortable>
                     <template #header> <div v-tooltip.top="'Yard Differential'">YDif</div></template><template #body="{ data }"> {{ data.yardsDiff.toFixed(showTotalsPerGame ? 1 : 0) }} </template></Column
                 >
+
                 <Column v-if="showTotalTurnovers" field="turnoversFor" sortable>
                     <template #header> <div v-tooltip.top="'Turnovers For'">ToF</div></template><template #body="{ data }"> {{ data.turnoversFor.toFixed(showTotalsPerGame ? 1 : 0) }} </template></Column
                 ><Column v-if="showTotalTurnovers" field="turnoversAgainst" sortable>
                     <template #header> <div v-tooltip.top="'Turnovers Against'">ToA</div></template><template #body="{ data }"> {{ data.turnoversAgainst.toFixed(showTotalsPerGame ? 1 : 0) }} </template></Column
                 ><Column v-if="showTotalTurnovers" field="turnoversDiff" sortable>
                     <template #header> <div v-tooltip.top="'Turnover Differential'">ToDif</div></template><template #body="{ data }"> {{ data.turnoversDiff.toFixed(showTotalsPerGame ? 1 : 0) }} </template></Column
-                >
+                > -->
             </DataTable>
         </Panel>
         <Panel>
