@@ -2,9 +2,11 @@
 import StatsHeader from '@/layout/StatsHeader.vue';
 import Checkbox from 'primevue/checkbox';
 import DataTable from 'primevue/datatable';
+import MultiSelect from 'primevue/multiselect';
 import Panel from 'primevue/panel';
+
 import { v4 as uuidv4 } from 'uuid';
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 
 type TeamName =
     | 'Arizona Cardinals'
@@ -244,8 +246,30 @@ function processData() {
 }
 
 const showSchedule = ref<boolean>(true);
-const showTotals = ref<boolean>(true);
+const showTotalsTable = ref<boolean>(true);
 const showTotalsPerGame = ref<boolean>(false);
+const totalsColumns = ref([
+    { field: 'record', header: 'Record' },
+    { field: 'points', header: 'Points' },
+    { field: 'yards', header: 'Yards' },
+    { field: 'turnovers', header: 'Turnovers' }
+]);
+const selectedTotals = ref(totalsColumns.value);
+const onToggleTotals = (val) => {
+    selectedTotals.value = totalsColumns.value.filter((col) => val.includes(col));
+};
+const showTotalRecord = computed(() => {
+    return selectedTotals.value.some((col) => col.field === 'record');
+});
+const showTotalPoints = computed(() => {
+    return selectedTotals.value.some((col) => col.field === 'points');
+});
+const showTotalYards = computed(() => {
+    return selectedTotals.value.some((col) => col.field === 'yards');
+});
+const showTotalTurnovers = computed(() => {
+    return selectedTotals.value.some((col) => col.field === 'turnovers');
+});
 </script>
 
 <template>
@@ -255,22 +279,45 @@ const showTotalsPerGame = ref<boolean>(false);
             <template #header>
                 <div class="flex items-center gap-2">
                     <span class="text-900 font-medium text-xl">2024 Totals</span>
-                    <Button text icon="pi pi-plus" label="Show Totals" @click="showTotals = true" v-if="!showTotals" />
-                    <Button text icon="pi pi-minus" label="Hide Totals" @click="showTotals = false" v-if="showTotals" />
-                    <Checkbox label="Per Game" inputId="showTotalsPerGame" v-model="showTotalsPerGame" binary /><label for="showTotalsPerGame">Per Game</label>
+                    <Button text icon="pi pi-plus" label="Show Totals" @click="showTotalsTable = true" v-if="!showTotalsTable" />
+                    <Button text icon="pi pi-minus" label="Hide Totals" @click="showTotalsTable = false" v-if="showTotalsTable" />
                 </div>
             </template>
-            <DataTable :value="showTotalsPerGame ? totalsPerGame : teamTotalsData" dataKey="name" showGridlines stripedRows v-if="showTotals" removableSort>
+            <DataTable :value="showTotalsPerGame ? totalsPerGame : teamTotalsData" dataKey="name" size="small" scrollable showGridlines stripedRows v-if="showTotalsTable" removableSort>
+                <template #header>
+                    <div class="flex items-center gap-2" style="text-align: left">
+                        <MultiSelect :modelValue="selectedTotals" :options="totalsColumns" optionLabel="header" @update:modelValue="onToggleTotals" display="chip" placeholder="Select Columns" />
+                        <Checkbox label="Per Game" inputId="showTotalsPerGame" v-model="showTotalsPerGame" binary /><label for="showTotalsPerGame">Per Game</label>
+                    </div>
+                </template>
                 <Column field="name" header="Team"></Column>
                 <Column v-if="!showTotalsPerGame" field="gameCount" header="Games"></Column>
-                <Column v-if="!showTotalsPerGame" field="wins" header="Wins" sortable></Column>
-                <Column v-if="!showTotalsPerGame" field="losses" header="Losses" sortable></Column>
-                <Column field="pointsFor" header="Points For" sortable
-                    ><template #body="{ data }"> {{ data.pointsFor.toFixed(showTotalsPerGame ? 1 : 0) }} </template></Column
-                ><Column field="pointsAgainst" header="Points Against" sortable
-                    ><template #body="{ data }"> {{ data.pointsAgainst.toFixed(showTotalsPerGame ? 1 : 0) }} </template></Column
-                ><Column field="pointsDiff" header="Points Diff" sortable
-                    ><template #body="{ data }"> {{ data.pointsDiff.toFixed(showTotalsPerGame ? 1 : 0) }} </template></Column
+                <Column v-if="!showTotalsPerGame && showTotalRecord" field="wins" sortable
+                    ><template #header> <div v-tooltip.top="'Wins'">W</div></template>
+                </Column>
+                <Column v-if="!showTotalsPerGame && showTotalRecord" field="losses" sortable
+                    ><template #header> <div v-tooltip.top="'Losses'">L</div></template>
+                </Column>
+                <Column v-if="showTotalPoints" field="pointsFor" sortable>
+                    <template #header> <div v-tooltip.top="'Points For'">PF</div></template> <template #body="{ data }"> {{ data.pointsFor.toFixed(showTotalsPerGame ? 1 : 0) }} </template></Column
+                ><Column v-if="showTotalPoints" field="pointsAgainst" sortable>
+                    <template #header> <div v-tooltip.top="'Points Against'">PA</div></template><template #body="{ data }"> {{ data.pointsAgainst.toFixed(showTotalsPerGame ? 1 : 0) }} </template></Column
+                ><Column v-if="showTotalPoints" field="pointsDiff" sortable>
+                    <template #header> <div v-tooltip.top="'Point Differential'">PDif</div></template><template #body="{ data }"> {{ data.pointsDiff.toFixed(showTotalsPerGame ? 1 : 0) }} </template></Column
+                >
+                <Column v-if="showTotalYards" field="yardsFor" sortable>
+                    <template #header> <div v-tooltip.top="'Yards For'">YF</div></template><template #body="{ data }"> {{ data.yardsFor.toFixed(showTotalsPerGame ? 1 : 0) }} </template></Column
+                ><Column v-if="showTotalYards" field="yardsAgainst" sortable>
+                    <template #header> <div v-tooltip.top="'Yards Against'">YA</div></template><template #body="{ data }"> {{ data.yardsAgainst.toFixed(showTotalsPerGame ? 1 : 0) }} </template></Column
+                ><Column v-if="showTotalYards" field="yardsDiff" sortable>
+                    <template #header> <div v-tooltip.top="'Yard Differential'">YDif</div></template><template #body="{ data }"> {{ data.yardsDiff.toFixed(showTotalsPerGame ? 1 : 0) }} </template></Column
+                >
+                <Column v-if="showTotalTurnovers" field="turnoversFor" sortable>
+                    <template #header> <div v-tooltip.top="'Turnovers For'">ToF</div></template><template #body="{ data }"> {{ data.turnoversFor.toFixed(showTotalsPerGame ? 1 : 0) }} </template></Column
+                ><Column v-if="showTotalTurnovers" field="turnoversAgainst" sortable>
+                    <template #header> <div v-tooltip.top="'Turnovers Against'">ToA</div></template><template #body="{ data }"> {{ data.turnoversAgainst.toFixed(showTotalsPerGame ? 1 : 0) }} </template></Column
+                ><Column v-if="showTotalTurnovers" field="turnoversDiff" sortable>
+                    <template #header> <div v-tooltip.top="'Turnover Differential'">ToDif</div></template><template #body="{ data }"> {{ data.turnoversDiff.toFixed(showTotalsPerGame ? 1 : 0) }} </template></Column
                 >
             </DataTable>
         </Panel>
@@ -282,7 +329,7 @@ const showTotalsPerGame = ref<boolean>(false);
                     <Button text icon="pi pi-minus" label="Hide Schedule" @click="showSchedule = false" v-if="showSchedule" />
                 </div>
             </template>
-            <DataTable :value="processedGameData" dataKey="id" showGridlines stripedRows paginator :rows="10" v-if="showSchedule">
+            <DataTable :value="processedGameData" dataKey="id" size="small" scrollable showGridlines stripedRows paginator :rows="10" v-if="showSchedule">
                 <Column field="week" header="Week"></Column>
                 <Column field="winner" header="Winner"></Column>
                 <Column field="pointsWinner" header="Points"></Column>
