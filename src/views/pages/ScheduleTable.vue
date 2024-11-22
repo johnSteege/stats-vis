@@ -4,6 +4,7 @@ import Checkbox from 'primevue/checkbox';
 import DataTable from 'primevue/datatable';
 import MultiSelect from 'primevue/multiselect';
 import Panel from 'primevue/panel';
+import Select from 'primevue/select';
 
 import { v4 as uuidv4 } from 'uuid';
 import { computed, onMounted, ref } from 'vue';
@@ -131,6 +132,21 @@ onMounted(() => {
         });
 });
 
+const weeks = ref<{ name: string; num: number }[]>([
+    { name: 'Week 1', num: 1 },
+    { name: 'Week 2', num: 2 },
+    { name: 'Week 3', num: 3 },
+    { name: 'Week 4', num: 4 },
+    { name: 'Week 5', num: 5 },
+    { name: 'Week 6', num: 6 },
+    { name: 'Week 7', num: 7 },
+    { name: 'Week 8', num: 8 },
+    { name: 'Week 9', num: 9 },
+    { name: 'Week 10', num: 10 },
+    { name: 'Week 11', num: 11 }
+]);
+const selectedWeek = ref({ name: 'Week 1', num: 1 });
+
 type ProcessedGameResult = {
     id: string;
     week: number;
@@ -145,6 +161,10 @@ type ProcessedGameResult = {
     turnoversLoser: number;
 };
 const processedGameData = ref<ProcessedGameResult[]>([]);
+
+const gameDataByWeek = computed<ProcessedGameResult[]>(() => {
+    return processedGameData.value.filter((game) => game.week == selectedWeek.value.num);
+});
 
 type TeamTotals = {
     name: TeamName;
@@ -207,9 +227,9 @@ function processData() {
         winnerTotals.yardsFor += Number(game.yardsWinner);
         winnerTotals.yardsAgainst += Number(game.yardsLoser);
         winnerTotals.yardsDiff += Number(game.yardsWinner - game.yardsLoser);
-        winnerTotals.turnoversFor += Number(game.turnoversWinner);
-        winnerTotals.turnoversAgainst += Number(game.turnoversLoser);
-        winnerTotals.turnoversDiff += Number(game.turnoversWinner - game.turnoversLoser);
+        winnerTotals.turnoversFor += Number(game.turnoversLoser);
+        winnerTotals.turnoversAgainst += Number(game.turnoversWinner);
+        winnerTotals.turnoversDiff += Number(game.turnoversLoser - game.turnoversWinner);
 
         const loserTotals: TeamTotals = teamTotalsData.value.find((team) => team.name === game.loser);
         loserTotals.gameCount++;
@@ -220,9 +240,9 @@ function processData() {
         loserTotals.yardsFor += Number(game.yardsLoser);
         loserTotals.yardsAgainst += Number(game.yardsWinner);
         loserTotals.yardsDiff += Number(game.yardsLoser - game.yardsWinner);
-        loserTotals.turnoversFor += Number(game.turnoversLoser);
-        loserTotals.turnoversAgainst += Number(game.turnoversWinner);
-        loserTotals.turnoversDiff += Number(game.turnoversLoser - game.turnoversWinner);
+        loserTotals.turnoversFor += Number(game.turnoversWinner);
+        loserTotals.turnoversAgainst += Number(game.turnoversLoser);
+        loserTotals.turnoversDiff += Number(game.turnoversWinner - game.turnoversLoser);
     });
 
     TEAM_NAME_VALUES.forEach((name) => {
@@ -325,11 +345,12 @@ const showTotalTurnovers = computed(() => {
             <template #header>
                 <div class="flex items-center gap-2">
                     <span class="text-900 font-medium text-xl">2024 Schedule</span>
+                    <Select v-model="selectedWeek" :options="weeks" optionLabel="name"></Select>
                     <Button text icon="pi pi-plus" label="Show Schedule" @click="showSchedule = true" v-if="!showSchedule" />
                     <Button text icon="pi pi-minus" label="Hide Schedule" @click="showSchedule = false" v-if="showSchedule" />
                 </div>
             </template>
-            <DataTable :value="processedGameData" dataKey="id" size="small" scrollable showGridlines stripedRows paginator :rows="10" v-if="showSchedule">
+            <DataTable :value="gameDataByWeek" dataKey="id" size="small" scrollable showGridlines stripedRows v-if="showSchedule">
                 <Column field="week" header="Week"></Column>
                 <Column field="winner" header="Winner"></Column>
                 <Column field="pointsWinner" header="Points"></Column>
